@@ -30,7 +30,44 @@ module.exports = class SoundCloud extends Events {
       this.playPause()
     }
   }
+// OBS edition by gwin start
+seekForward() {
+  this.trigger('Right')
+}
 
+  seekBackward() {
+  this.trigger('Left')
+}
+
+  volumeUp() {
+  this.window.webContents.sendInputEvent({
+    type: 'keyDown',
+    keyCode: 'Up',
+    modifiers: ['Shift']
+  })
+
+  this.window.webContents.sendInputEvent({
+    type: 'keyUp',
+    keyCode: 'Up',
+    modifiers: ['Shift']
+  })
+}
+
+  volumeDown() {
+  this.window.webContents.sendInputEvent({
+    type: 'keyDown',
+    keyCode: 'Down',
+    modifiers: ['Shift']
+  })
+
+  this.window.webContents.sendInputEvent({
+    type: 'keyUp',
+    keyCode: 'Down',
+    modifiers: ['Shift']
+  })
+}
+
+// OBS edition by gwin end
   likeUnlike() {
     this.trigger('L')
   }

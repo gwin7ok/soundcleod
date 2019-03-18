@@ -18,6 +18,15 @@ const touchBarMenu = require('./touch-bar-menu')
 const windowOpenPolicy = require('./window-open-policy')
 const windowState = require('electron-window-state')
 
+
+// OBS edition by gwin start
+var fs = require('fs')
+var http = require('http')
+const path = require('path');
+const url = require('url');
+const request = require('request')
+// OBS edition by gwin end
+
 let mainWindow = null
 let aboutWindow = null
 
@@ -131,6 +140,18 @@ app.on('ready', () => {
   mainWindow.on('closed', () => {
     if (process.platform !== 'darwin') {
       app.quit()
+// OBS edition by gwin start
+      fs.unlink(`${app.getPath('documents')}\\soundcleod.txt`, (err) => {
+        if (err) throw err;
+        console.log('soundcleod.txt is Deleted');
+        });
+        
+        
+        fs.unlink(`${app.getPath('documents')}\\artwork.jpg`, (err) => {
+        if (err) throw err;
+        console.log('artwork.jpg is Deleted');
+        });
+  // OBS edition by gwin end    
     }
     mainWindow = null
   })
@@ -146,6 +167,51 @@ app.on('ready', () => {
   globalShortcut.register('MediaPreviousTrack', () => {
     soundcloud.previousTrack()
   })
+
+// added by gwin start
+globalShortcut.register('MediaStop', () => {
+  soundcloud.pause()
+})
+
+
+globalShortcut.register('CommandOrControl+Alt+P', () => {
+  soundcloud.playPause()
+console.log('playPause()')
+
+})
+globalShortcut.register('CommandOrControl+Alt+O', () => {
+  soundcloud.pause()
+console.log('pause()')
+
+})
+
+globalShortcut.register('CommandOrControl+Alt+R', () => {
+  soundcloud.nextTrack()
+console.log('nextTrack()')
+})
+globalShortcut.register('CommandOrControl+Alt+B', () => {
+  soundcloud.previousTrack() 
+console.log('previousTrack() ')
+})
+globalShortcut.register('Shift+Alt+End', () => {
+  soundcloud.seekForward()
+ console.log('seekForward()')
+})
+globalShortcut.register('Shift+Alt+Home', () => {
+  soundcloud.seekBackward() 
+ console.log('seekBackward()')
+})
+globalShortcut.register('Shift+Alt+PageUp', () => {
+  soundcloud.volumeUp() 
+ console.log('volumeUp()')
+})
+globalShortcut.register('Shift+Alt+PageDown', () => {
+  soundcloud.volumeDown() 
+ console.log('volumeDown()')
+})
+
+// added by gwin end
+
 
   menu.events.on('playPause', () => {
     if (isNotFocused()) {
@@ -237,7 +303,24 @@ app.on('ready', () => {
 
   soundcloud.on('play-new-track', ({ title, subtitle, artworkURL }) => {
     mainWindow.webContents.send('notification', { title, body: subtitle, icon: artworkURL })
-  })
+
+        	// OBS edition by gwin start
+          fs.writeFile(`${app.getPath('documents')}\\soundcleod.txt`, `　♫Artist：${subtitle}　　♫TRACK：${title}　`, (err) => {
+            if (err) throw err
+            console.log('soundcleod.txt saved')
+                })
+              
+        
+      
+        request(
+              {method: 'GET', url: artworkURL, encoding: null},
+              (e, r, b) => fs.writeFileSync(`${app.getPath('documents')}\\artwork.${artworkURL.split('.').reverse()[0]}`, b, 'binary')
+        );
+        if (err) throw err
+        console.log('artwork saved')
+      
+        // OBS edition by gwin end
+           })
 
   mainWindow.webContents.once('did-start-loading', () => {
     mainWindow.setTitle('Loading soundcloud.com...')
